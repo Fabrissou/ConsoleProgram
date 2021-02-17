@@ -14,6 +14,9 @@
         Actually will be: java -jar ls.jar [-l] [-h] [-r] [-o output.file] directory_or_file
         Кроме самой программы, следует написать автоматические тесты к ней.*/
 
+/*Программа использует библиотеку args4j. При запуске программы создается класс LsLauncher
+и сразу вызывается метод launch, который включает нужные флаги. Все флаги и имя файла передаются
+в класс Ls. Класс Ls разбирается какие флаги включены и выводит нужную информацию в консоль*/
 
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;

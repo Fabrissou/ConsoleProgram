@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Objects;
 
 public class Ls {
     private final File directory;
