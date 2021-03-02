@@ -1,173 +1,159 @@
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 
 public class LsLauncherTest {
-
-    private void assertFileContent(String name, String expectedContent) throws IOException {
-//        File file = new File(name);
-        String content = new String(Files.readAllBytes(Paths.get(name)));
+    private void assertFileContent(String expectedContent) throws IOException {
+        String content = new String(Files.readAllBytes(Paths.get("testFiles/output/out")));
         assertEquals(expectedContent, content);
-    }
-
-    private final ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-    @Before
-    public void setUp() throws Exception {
-        System.setOut(new PrintStream(output));
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        System.setOut(null);
     }
 
     @Test
     public void main() throws IOException {
-        LsLauncher.main(new String[]{"files"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"--long", "files"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"--human", "files"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"-l", "files/lol"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"-r", "-h", "files/newDir"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"-l", "-h", "--reverse", "files/testdir"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"abc"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"-r", "abc"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"-l", "files/lol/keker"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"--reverse", "files/SUPERMEGADIR"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"--long", "ULTRADIR99999"});
-        System.out.println("\n");
-        LsLauncher.main(new String[]{"fbi"});
+//      простой тест
+        LsLauncher.main(new String[]{"testFiles/input"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "abc",
+                "lol",
+                "newDir",
+                "superDiiir",
+                "test",
+                "testdir")), LsLauncher.getLss());
 
+////        простой тест
+        LsLauncher.main(new String[]{"testFiles/input/lol"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "abc",
+                "keker",
+                "names")), LsLauncher.getLss());
 
-        Assert.assertEquals("""
+////        тесы флага -l
+        LsLauncher.main(new String[]{"-l", "testFiles/input/lol"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "abc 110 74600 1613464462100",
+                "keker 110 96880 1613464462086",
+                "names 110 2364 1613464462146")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"--long", "testFiles/input/newDir"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "327854358439 110 720 1613464462082",
+                "ffff 110 1610 1613464462090",
+                "goodFile 110 2366 1613464462079",
+                "gun 110 1643 1613464462096")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"--long", "testFiles/input/testdir"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "93939393993939393993 110 0 1613464443179",
+                "haha 110 5134 1613538834100",
+                "jobs 110 11837 1613464462148")), LsLauncher.getLss());
+
+//        тесты флага -h
+        LsLauncher.main(new String[]{"-h", "testFiles/input/superDiiir"});
+        assertEquals(new ArrayList<>(Collections.singletonList("printer rw 4Kb")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"--human", "testFiles/input/abc"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "A rw 0Byte",
+                "B rw 0Byte",
+                "C rw 0Byte",
+                "D rw 0Byte",
+                "E rw 0Byte")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"-h", "testFiles/input/newDir"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "327854358439 rw 90Byte",
+                "ffff rw 201Byte",
+                "goodFile rw 295Byte",
+                "gun rw 205Byte")), LsLauncher.getLss());
+
+//        тесты флага -r
+        LsLauncher.main(new String[]{"-r", "testFiles/input/abc"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "E", "D", "C", "B", "A")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"--reverse", "testFiles/input/lol"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "names", "keker", "abc")), LsLauncher.getLss());
+
+//        тесты флага -o
+        LsLauncher.main(new String[]{"-o", "testFiles/output/out", "testFiles/input"});
+        assertFileContent("""
+                abc
                 lol
                 newDir
                 superDiiir
-                testdir
-                    
-                                
-                lol 111 160 1613464462146
-                newDir 111 192 1613464462096
-                superDiiir 111 96 1613464462143
-                testdir 111 160 1613538834100 
-                                
-                                
-                lol rwx 160Kb
-                newDir rwx 192Kb
-                superDiiir rwx 96Kb
-                testdir rwx 160Kb   
-                                
-                                
-                abc 110 74600 1613464462100
-                keker 110 96880 1613464462086
-                names 110 2364 1613464462146
-                                
-                                
-                gun rw 1Kb
-                goodFile rw 2Kb
-                ffff rw 1Kb
-                327854358439 rw 0Kb
-                                
-                                
-                jobs rw 11Kb 1613464462148
-                haha rw 5Kb 1613538834100
-                93939393993939393993 rw 0Kb 1613464443179
-                                
-                                
-                A
-                B
-                C
-                D
-                E
-                                
-                                
-                E
-                D
-                C
-                B
-                A
-                                
-                                
-                keker 110 96880 1613464462086
-                                
-                                
-                There is no such directory
-                                
-                                
-                There is no such directory
-                                
-                                
-                There is no such directory
-                """, output.toString());
-
-        LsLauncher.main(new String[]{"-o", "saveFiles/save", "files"});
-        assertFileContent("saveFiles/save", """
-                lol
-                newDir
-                superDiiir
+                test
                 testdir
                 """);
-        LsLauncher.main(new String[]{"-o", "saveFiles/save", "files/lol"});
-        assertFileContent("saveFiles/save", """
+
+        LsLauncher.main(new String[]{"--output", "testFiles/output/out", "testFiles/input/lol"});
+        assertFileContent("""
                 abc
                 keker
                 names
                 """);
-        LsLauncher.main(new String[]{"-l", "-r", "--human","--output", "saveFiles/save", "files"});
-        assertFileContent("saveFiles/save", """
-                testdir rwx 160Kb 1613538834100
-                superDiiir rwx 96Kb 1613464462143
-                newDir rwx 192Kb 1613464462096
-                lol rwx 160Kb 1613464462146
-                """);
-        LsLauncher.main(new String[]{"--long", "-o", "saveFiles/save", "files"});
-        assertFileContent("saveFiles/save", """
-                lol 111 160 1613464462146
-                newDir 111 192 1613464462096
-                superDiiir 111 96 1613464462143
-                testdir 111 160 1613538834100
-                """);
-        LsLauncher.main(new String[]{"--output", "saveFiles/save", "abc"});
-        assertFileContent("saveFiles/save", """
-                A
-                B
-                C
-                D
-                E
-                """);
-        LsLauncher.main(new String[]{"--reverse", "-o", "saveFiles/save", "abc"});
-        assertFileContent("saveFiles/save", """
-                E
-                D
-                C
-                B
-                A
+
+//        тесты одиночного файла
+        LsLauncher.main(new String[]{"-l", "testFiles/input/lol/names"});
+        assertEquals(new ArrayList<>(Collections.singletonList("names 110 2364 1613464462146")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"-h", "testFiles/input/lol/keker"});
+        assertEquals(new ArrayList<>(Collections.singletonList("keker rw 11Kb")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"--output", "testFiles/output/out", "testFiles/input/newDir/ffff"});
+        assertFileContent("ffff\n");
+
+//        смешанные тесты
+        LsLauncher.main(new String[]{"--long", "-h", "--reverse", "testFiles/input/newDir"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "gun rw 205Byte 1613464462096",
+                "goodFile rw 295Byte 1613464462079",
+                "ffff rw 201Byte 1613464462090",
+                "327854358439 rw 90Byte 1613464462082")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"--output", "testFiles/output/out", "--long", "-h", "--reverse", "testFiles/input/newDir/"});
+        assertFileContent("""
+                gun rw 205Byte 1613464462096
+                goodFile rw 295Byte 1613464462079
+                ffff rw 201Byte 1613464462090
+                327854358439 rw 90Byte 1613464462082
                 """);
 
+        LsLauncher.main(new String[]{"-l", "--human", "testFiles/input/"});
+        assertEquals(new ArrayList<>(Arrays.asList(
+                "abc rwx 0Byte 1614528915840",
+                "lol rwx 0Byte 1613464462146",
+                "newDir rwx 0Byte 1613464462096",
+                "superDiiir rwx 0Byte 1613464462143",
+                "test rw 0Byte 1614539129897",
+                "testdir rwx 0Byte 1613538834100")), LsLauncher.getLss());
 
 
+//        проверка ошибок, связанных с неизвестными флагами:
+        LsLauncher.main(new String[]{"-l", "--huma", "testFiles/input/"});
+        assertEquals(new ArrayList<>(Collections.singletonList("Please use the existing flags")), LsLauncher.getLss());
 
+        LsLauncher.main(new String[]{"SUPERFLAG", "testFiles/input/"});
+        assertEquals(new ArrayList<>(Collections.singletonList("Please use the existing flags")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"--0010102", "testFiles/input/"});
+        assertEquals(new ArrayList<>(Collections.singletonList("Please use the existing flags")), LsLauncher.getLss());
+
+//        проверка ошибок, связанных с неправильными директориями
+        LsLauncher.main(new String[]{"-l", "testFiles/input/SUPERDIRRRRRRRRRR"});
+        assertEquals(new ArrayList<>(Collections.singletonList("There is no such directory")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"directoria33333"});
+        assertEquals(new ArrayList<>(Collections.singletonList("There is no such directory")), LsLauncher.getLss());
+
+        LsLauncher.main(new String[]{"strangeDir"});
+        assertEquals(new ArrayList<>(Collections.singletonList("There is no such directory")), LsLauncher.getLss());
     }
-
 }

@@ -23,6 +23,9 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import java.io.File;
+import java.util.*;
+
 public class LsLauncher {
 
     @Option(name = "-l", aliases = "--long", required = false)
@@ -35,33 +38,40 @@ public class LsLauncher {
     private boolean reverse;
 
     @Option(name = "-o", aliases = "--output", required = false)
-    private String output;
+    private File output;
 
     @Argument(required = true, metaVar = "InputName", usage = "Input directory/file name")
     private String inputDirectoryName;
 
+    private static List<String> lss = new ArrayList<>();
 
-    public static void main(String[] args) {
-        new LsLauncher().launch(args);
+    public static List<String> getLss() {
+        return lss;
     }
 
-    private void launch(String[] args) {
+    public static void main(String[] args) {
+        lss = new LsLauncher().launch(args);
+        System.out.println(lss);
+    }
 
+    public List<String> launch(String[] args) {
         CmdLineParser parser = new CmdLineParser(this);
+
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
             System.err.println(e.getMessage());
             System.err.println("java -jar ls.jar [-l] [-h] [-r] [-o output.file] directory_or_file");
             parser.printUsage(System.err);
-            return;
+            return Collections.singletonList("Please use the existing flags");
         }
 
         Ls ls = new Ls(longer, humanReadable, reverse, output, inputDirectoryName);
+
         try {
-            ls.getLs();
+            return ls.getLs();
         } catch (Exception e) {
-            System.out.println("There is no such directory");
+            return Collections.singletonList("There is no such directory");
         }
     }
 }
