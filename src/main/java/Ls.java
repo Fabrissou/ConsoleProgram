@@ -24,35 +24,38 @@ public class Ls {
         boolean w = file.canWrite();
         boolean r = file.canRead();
         if (human) {
-            return (r ? "r" : "") + (w ? "w" : "") + (x ? "x" : "");
+            return (r ? "r" : "-") + (w ? "w" : "-") + (x ? "x" : "-");
         } else if (longer) {
             return (r ? "1" : "0") + (w ? "1" : "0") + (x ? "1" : "0");
         }
         return "";
     }
 
-    @NotNull
-    private String getSize(File file) {
-        long size = file.isDirectory() ? 0 : file.length();
+    enum Data {
+        BYTE("Byte", 8),
+        KB("Kb", 1024 * 8),
+        MB("Mb", 1024 * 1024 * 8),
+        GB("Gb", 1024L * 1024 * 1024 * 8);
+
         long coefficient;
         String dataSize;
 
-        if (size < 1024 * 8) {
-            coefficient = 8;
-            dataSize = "Byte";
-        } else if (size < 1024 * 1024 * 8) {
-            coefficient = 1024 * 8;
-            dataSize = "Kb";
-        } else if (size < 1024L * 1024 * 1024 * 8) {
-            coefficient = 1024 * 1024 * 8;
-            dataSize = "Mb";
-        } else {
-            coefficient = 1024L * 1024 * 1024 * 8;
-            dataSize = "Gb";
+        Data(String dataSize, long coefficient) {
+            this.dataSize = dataSize;
+            this.coefficient = coefficient;
         }
+    }
+
+    @NotNull
+    private String getSize(File file) {
+        long size = file.isDirectory() ? 0 : file.length();
 
         if (human) {
-            return size / coefficient + dataSize;
+            for (Data i: Data.values()) {
+                if (size < i.coefficient * 1024) {
+                    return size / i.coefficient + i.dataSize;
+                }
+            }
         } else if (longer) {
             return String.valueOf(size);
         }
@@ -102,7 +105,7 @@ public class Ls {
             }
 
             writer.close();
-            return Collections.singletonList("The information is written to a file");
+            return Collections.emptyList();
         } else {
             return lsAnswer;
         }

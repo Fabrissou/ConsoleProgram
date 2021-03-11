@@ -43,18 +43,12 @@ public class LsLauncher {
     @Argument(required = true, metaVar = "InputName", usage = "Input directory/file name")
     private String inputDirectoryName;
 
-    private static List<String> lss = new ArrayList<>();
-
-    public static List<String> getLss() {
-        return lss;
-    }
-
     public static void main(String[] args) {
-        lss = new LsLauncher().launch(args);
-        System.out.println(lss);
+        List<String> answwww = new LsLauncher().launch(args);
+        System.out.println(answwww);
     }
 
-    public List<String> launch(String[] args) {
+    public List<String> launch(String... args) {
         CmdLineParser parser = new CmdLineParser(this);
 
         try {
